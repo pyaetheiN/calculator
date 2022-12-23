@@ -3,13 +3,13 @@ const operationButtons = document.querySelectorAll('[data-operation]');
 const equalsButton = document.querySelector('[data-equals]');
 const allClearButton = document.querySelector('[data-all-clear]');
 const deleteButton = document.querySelector('[data-delete]');
-const previousOperantTextElement = document.querySelector('[data-previous-operand]');
-const currentOperantTextElement = document.querySelector('[data-current-operand]');
+const previousOperandTextElement = document.querySelector('[data-previous-operand]');
+const currentOperandTextElement = document.querySelector('[data-current-operand]');
 
 class Calculator{
-  constructor(previousOperantTextElement, currentOperantTextElement){
-    this.previousOperantTextElement = previousOperantTextElement;
-    this.currentOperantTextElement = currentOperantTextElement;
+  constructor(previousOperandTextElement, currentOperandTextElement){
+    this.previousOperandTextElement = previousOperandTextElement;
+    this.currentOperandTextElement = currentOperandTextElement;
     this.clear();
   }
 
@@ -33,7 +33,7 @@ class Calculator{
     if (this.previousOperand !== '') {
       this.compute();
     }
-    this.operation = operation;
+    this.operation = operation; // *
     this.previousOperand = this.currentOperand;
     this.currentOperand = '';
   }
@@ -59,18 +59,43 @@ class Calculator{
       default: // else
         return
     }
-    this.previousOperand = '';
     this.currentOperand = computation;
     this.operation = undefined;
+    this.previousOperand = '';
   }
 
+  getDisplayNumber(number) {
+    const stringNumber = number.toString(); // convert an object into a string for split function to work
+    const integarDigits = parseFloat(stringNumber.split('.')[0]); // numbers before split / need to be parsed to check isNaN()
+    const decimalDigits = stringNumber.split('.')[1]; // numbers after split / don't need to be a parsed
+    // summary: converting number to string first for split function to work then parsing it to check isNaN()
+    let integarDisplay;
+    if (isNaN(integarDigits)) { // if there aren't numbers
+      integarDisplay = ''; // then show nothing eg. -> .1 or 0.1
+    } else {
+      integarDisplay = integarDigits.toLocaleString('en');
+    }
+    if (decimalDigits != null) {
+      return `${integarDisplay}.${decimalDigits}`;
+    } else {
+      return integarDisplay;
+    }
+  }
+  
+
   updateDisplay() {
-    this.currentOperantTextElement.innerText = this.currentOperand;
-    this.previousOperantTextElement.innerText = this.previousOperand;
+    this.currentOperandTextElement.innerText = this.getDisplayNumber(this.currentOperand);
+    if (this.operation != null) { // undefined == null -> true / undefined === null -> false
+      this.previousOperandTextElement.innerText = `
+        ${this.getDisplayNumber(this.previousOperand)} ${this.operation}
+      `;
+    } else { // if operation is null
+      this.previousOperandTextElement.innerText = '';
+    }
   }
 }
 
-const calculator = new Calculator(previousOperantTextElement, currentOperantTextElement);
+const calculator = new Calculator(previousOperandTextElement, currentOperandTextElement);
 
 numberButtons.forEach(button => {
   button.addEventListener('click', () => {
